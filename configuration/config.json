@@ -1,0 +1,7 @@
+{
+	"mongodb_url":"mongodb://127.0.0.1/learning",
+	"platinum":50,
+	"gold":20,
+	"silver":10,
+	"bronze":5
+}
