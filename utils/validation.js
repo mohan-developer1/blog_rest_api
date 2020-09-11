@@ -49,13 +49,15 @@ module.exports = class validation{
 		else if (views >= config['bronze'])
 			badge = 'bronze'
 		console.log('badge:********** ',badge)
-		User.updateOne({'_id':user_id,"wallet.post_id":post_id},{$set:{"wallet.$.reward":badge}})
-			.then((result)=>{
-				console.log('wallet updated: ',result)
-			})
-			.catch((err)=>{
-				console.log('err at rewards: ',err)
-			})
+		if(badge != ''){
+			User.updateOne({'_id':user_id,"wallet.post_id":post_id},{$set:{"wallet.$.reward":badge}})
+				.then((result)=>{
+					console.log('wallet updated: ',result)
+				})
+				.catch((err)=>{
+					console.log('err at rewards: ',err)
+				})
+		}
 	}
 
 }

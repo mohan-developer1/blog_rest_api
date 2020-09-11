@@ -4,7 +4,8 @@ var morgan = require('morgan')
 var articles = require('./routes/articles.js')
 var cors = require('cors')
 var mongoose = require('mongoose')
-var mongoDB = 'mongodb://127.0.0.1/learning';
+var config = require('./configuration/config.json')
+var mongoDB = config['mongodb_url'];
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 app.use(morgan('dev'))
 app.use(express.json())

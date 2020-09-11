@@ -39,6 +39,7 @@ router.get('/:articalId',apiLimiter,oneOf([ check('userid').exists()]),(req,res,
 	console.log(errors)
 	if(!errors.isEmpty()){
 		res.status(400).json("userid missing")
+		return
 	}
 	const id = req.params.articalId
 	let user_id = req.body.userid
@@ -53,10 +54,11 @@ router.get('/:articalId',apiLimiter,oneOf([ check('userid').exists()]),(req,res,
 			if(article_resp){
 				console.log('article_resp: ',article_resp)
 				validation_ref.sendArticleData(article_resp,res);
-				Article.updateOne({_id:id}, {$addToSet:{views: user_id}}).then().catch()
+				Article.updateOne({_id:id}, {$addToSet:{views: user_id}})
 			}
 			else{
 				res.status(404).json({message:'No valid entry for provided ID'})
+				return
 			}			
 		})
 		.catch((err)=>{
@@ -95,6 +97,7 @@ router.post('/:userId',oneOf([ check('description').exists()]),(req,res,next)=>{
 	const errors = validationResult(req)
 	if(!errors.isEmpty()){
 		res.status(400).json("description is missing")
+		return
 	}
 	const id = req.params.userId
 	let description = req.body.description;
@@ -130,6 +133,7 @@ router.post('/:articleId/comment',oneOf([ check('userid').exists()]),(req,res,ne
 	const errors = validationResult(req)
 	if(!errors.isEmpty()){
 		res.status(400).json("userid is missing")
+		return
 	}
 	const id = req.params.articleId;
 	let user_id = req.body.userid;
@@ -147,29 +151,39 @@ router.post('/:articleId/comment',oneOf([ check('userid').exists()]),(req,res,ne
 		return comment_ref.save()
 	})
 	.then((result)=>{
+		console.log('result comment: ',result)
 		res.status(201).json({
-			message: 'you comment on article',
+			message: 'You commented on the article',
+			comment: result['comment_description'],
 			commentId:result["_id"]
 		})
 	})
 	.catch((err)=>{
-		console.log(err)
+		console.log(err["_message"])
 		res.status(500).json({
-			message:'error while commenting'
+			message:err["_message"]
 		})
 	})
 })
-router.post('/:articalId/upvote',(req,res,next)=>{
+router.post('/:articalId/upvote',oneOf([ check('userid').exists()]),(req,res,next)=>{
+	const errors = validationResult(req)
+	if(!errors.isEmpty()){
+		res.status(400).json("userid is missing")
+		return
+	}
 	const id = req.params.articalId
-	let user_id = req.body.user_id
+	let user_id = req.body.userid
 	User.findById(user_id)
 	.then((result)=>{
 		console.log(result)
-		return Article.updateOne({_id:id}, {$addToSet:{upvote: user_id}})			
+		return Article.updateOne({_id:id}, {$addToSet:{upvotes: user_id}})			
 	})
 	.then((resp)=>{
 		if(resp){
-			res.status(201).json(resp)
+			msg = 'You liked the article'
+			if(resp['nModified'] == 0)
+				msg='You already did that'
+			res.status(201).json(msg)
 		}
 		else{
 			res.status(404).json({message:'No valid user id'})
@@ -180,7 +194,12 @@ router.post('/:articalId/upvote',(req,res,next)=>{
 		res.status(500).json('user not found')
 	})
 })
-router.post('/:articalId/:commentId/reply-comment',(req,res,next)=>{
+router.post('/:articalId/:commentId/reply-comment',oneOf([ [check('userid').exists().withMessage("userid is required"),check('reply').exists().withMessage("reply description is required")]]),(req,res,next)=>{
+	const errors = validationResult(req)
+	if(!errors.isEmpty()){
+		res.status(400).json(errors.array())
+		return
+	}
 	const id = req.params.articalId;
 	let commentId = req.params.commentId;
 	let user_id = req.body.userid;
@@ -188,7 +207,7 @@ router.post('/:articalId/:commentId/reply-comment',(req,res,next)=>{
 	Article.findById(id)
 		.select('user_id')
 		.then((result)=>{
-			console.log(result)
+			console.log('result: ',result)
 			if(result["user_id"] == user_id){
 				console.log("you are article writer")
 				Comment.updateOne(
@@ -203,12 +222,12 @@ router.post('/:articalId/:commentId/reply-comment',(req,res,next)=>{
    				})
 			}
 			else{
-				console.log("you are not article writer")
 				res.status(200).json("you are not article writer to reply comment")
 			}
 		})
 		.catch((err)=>{
-			res.status(500).json("you are not blog user")
+			console.log(err)
+			res.status(500).json("please check aritcle_id once")
 		})
 })
 module.exports = router;
