@@ -1,5 +1,5 @@
 {
-	"mongodb_url":"mongodb://127.0.0.1/learning",
+	"mongodb_url":"mongodb+srv://mohan:mongodb@cluster0.botjf.mongodb.net/demo?retryWrites=true&w=majority",
 	"platinum":50,
 	"gold":20,
 	"silver":10,

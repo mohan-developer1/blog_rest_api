@@ -53,8 +53,16 @@ router.get('/:articalId',apiLimiter,oneOf([ check('userid').exists()]),(req,res,
 		.then((article_resp)=>{
 			if(article_resp){
 				console.log('article_resp: ',article_resp)
-				validation_ref.sendArticleData(article_resp,res);
-				Article.updateOne({_id:id}, {$addToSet:{views: user_id}})
+				Article.updateOne({_id:id}, {$addToSet:{views: user_id}},(err,docs)=>{
+					if(err){
+						console.log(err)
+					}
+					else{
+						console.log('views case: ',docs)
+						validation_ref.sendArticleData(article_resp,res);
+					}
+				})				
+				//Article.updateOne({_id:id}, {$addToSet:{views: user_id}})
 			}
 			else{
 				res.status(404).json({message:'No valid entry for provided ID'})
