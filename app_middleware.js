@@ -5,7 +5,7 @@ var articles = require('./routes/articles.js')
 var cors = require('cors')
 var mongoose = require('mongoose')
 var config = require('./configuration/config.json')
-var mongoDB = config['mongodb_url'];
+var mongoDB = process.env.MONGODB_URI || config['mongodb_url'];
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 app.use(morgan('dev'))
 app.use(express.json())
