@@ -76,7 +76,8 @@ router.get('/:articalId',apiLimiter,oneOf([ check('userid').exists()]),(req,res,
 })
 
 router.post('/add-users',(req,res,next)=>{
-	console.log('for adding users')
+
+	console.log('for adding users: ',req.originalUrl)
 	console.log('user name: ',req.body.user_name)
 	console.log('password: ',req.body.password)
 	var user = new User({

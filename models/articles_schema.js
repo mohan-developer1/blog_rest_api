@@ -9,3 +9,5 @@ var articles_schmea = mongoose.Schema({
 })
 
 module.exports = mongoose.model('articles',articles_schmea)
+
+// mongodb+srv://mohan:mongodb@cluster0.botjf.mongodb.net/demo?retryWrites=true&w=majority
